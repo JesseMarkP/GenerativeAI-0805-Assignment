@@ -1,0 +1,21 @@
+ProductID,ProductName,Category,Price
+1,Product_1,Clothing,618.12
+2,Product_2,Electronics,915.65
+3,Product_3,Furniture,365.83
+4,Sofa,Furniture,352.85
+5,Product_5,Furniture,167.35
+6,Product_6,Furniture,268.25
+7,Product_7,Clothing,256.14
+8,Product_8,Furniture,966.39
+9,Product_9,Furniture,428.31
+10,Product_10,Clothing,779.91
+11,Product_11,Electronics,168.94
+12,King Size Bed,Furniture,812.85
+13,Product_13,Electronics,594.05
+14,Product_14,Clothing,272.2
+15,Product_15,Furniture,478.68
+16,Product_16,Furniture,429.7
+17,Product_17,Clothing,690.59
+18,Product_18,Electronics,348.45
+19,Product_19,Electronics,263.91
+20,Product_20,Electronics,764.89

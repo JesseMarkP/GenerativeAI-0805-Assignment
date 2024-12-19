@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Data Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        #customer_name {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #0056b3;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #suggestions {
+            position: absolute;
+            max-width: 800px;
+            border: 1px solid #0056b3;
+            background-color: #fff;
+            border-radius: 4px;
+            overflow-y: auto;
+            /* Enables vertical scrolling */
+            max-height: 400px;
+            /* Set a maximum height for the dropdown */
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            margin-top: 4px;
+        }
+
+        #suggestions div {
+            padding: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #suggestions div:hover {
+            background-color: #f8f9fa;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .div3 {
+            float: right;
+        }
+
+        canvas {
+            height: 400px !important;
+            width: auto !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div class='wrapper'>
+
+            <div class="box div3">
+                <h3>HeroVired</h3>
+                <h4>GenAI-Capstone Project</h4>
+            </div>
+        </div>
+
+        <div class="box div2">
+            <h1>Enter Customer Name</h1>
+        </div>
+
+
+
+    </div>
+    <form method="POST">
+        <label for="customer_name">Customer Name:</label>
+        <input type="text" id="customer_name" name="customer_name" autocomplete="off" required
+            placeholder="Type or select a name..."><span style="
+        position: relative; 
+        right: 50px; 
+        top: 50%; 
+        transform: translateY(-50%);
+        font-size: 16px; 
+        color: #0056b3;
+        pointer-events: none;
+    ">&#x25BC</span>
+        <div id="suggestions"></div>
+        <button type="submit">Submit</button>
+    </form>
+
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+
+    {% if customer_details %}
+    <h2>Customer Details</h2>
+    <table>
+        <tr>
+            <th>Customer ID</th>
+            <th>Customer Name</th>
+            <th>Region</th>
+            <th>Join Date</th>
+        </tr>
+        <tr>
+            <td>{{ customer_details['CustomerID'] }}</td>
+            <td>{{ customer_details['CustomerName'] }}</td>
+            <td>{{ customer_details['Region'] }}</td>
+            <td>{{ customer_details['JoinDate'] }}</td>
+        </tr>
+    </table>
+
+    <!-- Add Summary Section -->
+    <div id="summary">
+        <h2>Purchased Summary</h2>
+        <p>Total Sales: ${{ total_sales }}</p>
+        <p>Total Products Purchased: {{ total_products }}</p>
+    </div>
+
+    <h2>Sales Analysis</h2>
+    <div style="display: flex; justify-content: space-between; gap: 20px;">
+        <canvas id="salesTrendChart" style="height: 400px; width: 200px;"></canvas>
+        <canvas id="categorySalesChart" style="height: 400px; width: 200px;"></canvas>
+    </div>
+
+    <!-- Add a Total Sale Value Column in Sales Data -->
+    <h2>Customer Sales Data</h2>
+    <table>
+        <tr>
+            <th>Product ID</th>
+            <th>ProductName</th>
+            <th>Category</th>
+            <th>Quantity</th>
+            <th>Price Per Unit</th>
+            <th>Total Sale Value</th> <!-- New Column -->
+            <th>Sale ID</th>
+            <th>Sale Date</th>
+        </tr>
+        {% for sale in sales_details %}
+        <tr>
+            <td>{{ sale['ProductID'] }}</td>
+            <td>
+                {% for product in product_details %}
+                    {% if product['ProductID'] == sale['ProductID'] %}
+                        {{ product['ProductName'] }}
+                    {% endif %}
+                {% endfor %}
+            </td>
+            <td>
+                {% for product in product_details %}
+                    {% if product['ProductID'] == sale['ProductID'] %}
+                        {{ product['Category'] }}
+                    {% endif %}
+                {% endfor %}
+            </td>
+            <td>{{ sale['Quantity'] }}</td>
+            <td>{{ sale['PricePerUnit'] }}</td>
+            <td>{{ sale['Quantity'] * sale['PricePerUnit'] }}</td> <!-- Calculated Column -->
+            <td>{{ sale['SalesID'] }}</td>
+            <td>{{ sale['SaleDate'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Product Categories and Subtotal -->
+    <h2>Purchased Products Details</h2>
+    <table>
+        <tr>
+            <th>Product ID</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Total Category Price</th> <!-- New Column -->
+        </tr>
+        {% for product in product_details %}
+        <tr>
+            <td>{{ product['ProductID'] }}</td>
+            <td>{{ product['ProductName'] }}</td>
+            <td>{{ product['Category'] }}</td>
+            <td>{{ product['Price'] }}</td>
+            <td>{{ product['Price'] * sales_details | selectattr('ProductID', 'equalto', product['ProductID']) |
+                map(attribute='Quantity') | sum }}</td> <!-- Calculated Column for Category Price -->
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+    <script>
+        const inputField = document.getElementById('customer_name');
+        const suggestionsDiv = document.getElementById('suggestions');
+
+        // Fetch all customers on focus
+        inputField.addEventListener('focus', function () {
+            fetch('/customer_suggestions?query=')
+                .then(response => response.json())
+                .then(data => {
+                    suggestionsDiv.innerHTML = '';
+                    data.forEach(customer => {
+                        const suggestion = document.createElement('div');
+                        suggestion.textContent = customer;
+                        suggestion.addEventListener('click', () => {
+                            inputField.value = customer;
+                            suggestionsDiv.innerHTML = ''; // Clear suggestions after selection
+                        });
+                        suggestionsDiv.appendChild(suggestion);
+                    });
+                });
+        });
+
+        // Filter suggestions on typing
+        inputField.addEventListener('input', function () {
+            const query = this.value.trim();
+            suggestionsDiv.innerHTML = ''; // Clear suggestions
+            if (query.length > 0) {
+                fetch(`/customer_suggestions?query=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(customer => {
+                            const suggestion = document.createElement('div');
+                            suggestion.textContent = customer;
+                            suggestion.addEventListener('click', () => {
+                                inputField.value = customer;
+                                suggestionsDiv.innerHTML = ''; // Clear suggestions after selection
+                            });
+                            suggestionsDiv.appendChild(suggestion);
+                        });
+                    });
+            }
+        });
+
+        // Hide suggestions on outside click
+        document.addEventListener('click', function (event) {
+            if (!event.target.closest('#customer_name') && !event.target.closest('#suggestions')) {
+                suggestionsDiv.innerHTML = ''; // Hide suggestions
+            }
+        });
+    </script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Fetch data for charts
+    fetch(`/sales_chart_data?customer_name=${encodeURIComponent('{{ customer_details["CustomerName"] }}')}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error(data.error);
+                return;
+            }
+
+            // Line Chart for Sales Trend
+            const ctx1 = document.getElementById('salesTrendChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: data.sales_over_time.map(item => item.SaleDate),
+                    datasets: [{
+                        label: 'Total Sales Over Time',
+                        data: data.sales_over_time.map(item => item.TotalSaleValue),
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        fill: false
+                    }]
+                }
+            });
+
+            // Pie Chart for Category Sales
+            const ctx2 = document.getElementById('categorySalesChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'pie',
+                data: {
+                    labels: data.category_sales.map(item => item.Category),
+                    datasets: [{
+                        label: 'Sales by Category',
+                        data: data.category_sales.map(item => item.TotalSaleValue),
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+                    }]
+                }
+            });
+        });
+</script>
+</body>
+
+</html>
